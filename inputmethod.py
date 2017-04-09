@@ -15,6 +15,7 @@ class ClafricaKeyboard:
         self.extrachar = None
         self.state = "none"
 
+
 cKeyboard = ClafricaKeyboard()
 typed = "false"
 codes = open("codes.txt", "r")
@@ -31,7 +32,7 @@ def getChars(character, dictionary):
         return None
 
 
-def getExceptions(): return [".", "*", "-", "_", "?", "backspace","1", "2", "3", "4", "5", "6", "7", "8", "9"]
+def getExceptions(): return [".", "*", "-", "_", "?", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 
 def writeString(string):
@@ -44,7 +45,7 @@ def updateDictionary(curr_dict, input):
     """ 
     :type input: str
     :type curr_dict: dict
-    
+
     :return: dict
     """
     new_dict = {}
@@ -53,7 +54,13 @@ def updateDictionary(curr_dict, input):
             new_dict[key] = curr_dict.get(key)
     return new_dict
 
+
 def callback(event):
+    """
+    Callback function that is called each time a key is pressed
+    :param event: 
+    :return: None
+    """
     if keyboard.is_pressed(event.name):
         if event.name not in getExceptions() and len(event.name) > 1:
             return
@@ -62,8 +69,9 @@ def callback(event):
             if bool(cKeyboard.dictionaries) and len(cKeyboard.dictionaries) > 0:
                 # if len(cKeyboard.currInput) > 0:
                 cKeyboard.currInput.pop()
-                cKeyboard.currentDict = cKeyboard.dictionaries[-1]
+
                 cKeyboard.dictionaries.pop()
+                cKeyboard.currentDict = cKeyboard.dictionaries[-1] if len(cKeyboard.dictionaries) > 0 else {}
             else:
                 cKeyboard.currentDict = {}
             print cKeyboard.currInput
@@ -84,7 +92,7 @@ def callback(event):
         if bool(new_dict) is False:
             # Let's check whether the previous input key exists in the dictionary
             if bool(cKeyboard.currentDict.get("".join(cKeyboard.currInput[:-1]))):
-                print "Yay I exist " #+ char
+                print "Yay I exist "  # + char
                 cKeyboard.state = "found_code_with_extra_char"
             else:
                 cKeyboard.currInput = []
@@ -93,7 +101,7 @@ def callback(event):
         # it is not the case that if the length is on then the user typed all the character codes
         # an exception is ae+: if the user types ae, len(new_dict) is one as its the only code with ae
         elif len(new_dict) == 1 and bool(cKeyboard.currentDict.get("".join(cKeyboard.currInput))):
-            print "one item "
+            # print "one item "
             print new_dict
             cKeyboard.state = "found_code"
         else:
@@ -105,7 +113,7 @@ def callback(event):
         if cKeyboard.state == "found_code" or cKeyboard.state == "found_code_with_extra_char":
             if cKeyboard.state == "found_code":
                 string = cKeyboard.currentDict.get("".join(cKeyboard.currInput))
-                print "found: "+ string
+                print "found: " + string
                 writeString(string)
                 keyboard.send("backspace")
                 cKeyboard.currInput = []
@@ -116,15 +124,7 @@ def callback(event):
                 print "found_code_with_extra_char" + cKeyboard.currInput[-1]
                 writeString(string)
                 keyboard.send("backspace")
-
                 keyboard.send(cKeyboard.currInput[-1])
-                # Initially I had a keyboard.send(cKeyboard.currInput[-1]) a here so the callback automatically populates
-                # currInput, dictionaries and currentDict. However write function sends many other keyboard events that disrupts
-                # the normal flow of the algorithm and leaves it in a state in which it was not supposed to be found.
-                # So I do the manual population here
-                cKeyboard.currInput = [cKeyboard.currInput[-1]]
-                cKeyboard.currentDict = updateDictionary(cKeyboard.codes, cKeyboard.currInput[-1])
-                cKeyboard.dictionaries = [].append(cKeyboard.currentDict)
             cKeyboard.state = "nothing"
 
 
