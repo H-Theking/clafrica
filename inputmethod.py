@@ -20,7 +20,7 @@ cKeyboard = ClafricaKeyboard()
 typed = "false"
 codes = open("codes.txt", "r")
 for line in codes:
-    keyVal = line.split(" ")
+    keyVal = line.strip().split(" ")
     # cKeyboard.codes[keyval[0]] = keyval[1]
     cKeyboard.codes.update(dict(zip(*[iter(keyVal)] * 2)))
 
@@ -35,11 +35,10 @@ def getChars(character, dictionary):
 def getExceptions(): return [".", "*", "-", "_", "?", "backspace", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 
-def writeString(string):
-    for i in range(1, len(string)):
+def writeString(string, length):
+    for i in range(1, length+1):
         keyboard.send("backspace")
     keyboard.write(unicode(string, "utf-8"))
-
 
 def updateDictionary(curr_dict, input):
     """ 
@@ -66,9 +65,10 @@ def callback(event):
             return
         if event.name == "backspace":
             # print "in backspace"
-            if bool(cKeyboard.dictionaries) and len(cKeyboard.dictionaries) > 0:
-                # if len(cKeyboard.currInput) > 0:
+            if len(cKeyboard.currInput) > 0:
                 cKeyboard.currInput.pop()
+
+            if bool(cKeyboard.dictionaries) and len(cKeyboard.dictionaries) > 0:
 
                 cKeyboard.dictionaries.pop()
                 cKeyboard.currentDict = cKeyboard.dictionaries[-1] if len(cKeyboard.dictionaries) > 0 else {}
@@ -84,7 +84,7 @@ def callback(event):
         new_dict = {}
         # use ckcodes if currdict is empty
         this_dict = cKeyboard.codes if bool(cKeyboard.currentDict) is False else cKeyboard.currentDict
-        print this_dict
+        # print this_dict
 
         new_dict = updateDictionary(this_dict, cKeyboard.currInput)
         print new_dict
@@ -112,20 +112,22 @@ def callback(event):
 
         if cKeyboard.state == "found_code" or cKeyboard.state == "found_code_with_extra_char":
             if cKeyboard.state == "found_code":
+                cKeyboard.state = "nothing"
                 string = cKeyboard.currentDict.get("".join(cKeyboard.currInput))
                 print "found: " + string
-                writeString(string)
-                keyboard.send("backspace")
+                writeString(string, len(cKeyboard.currInput))
+                # keyboard.send("backspace")
                 cKeyboard.currInput = []
                 cKeyboard.dictionaries = []
                 cKeyboard.currentDict = {}
             elif cKeyboard.state == "found_code_with_extra_char":
+                cKeyboard.state = "nothing"
                 string = cKeyboard.currentDict.get("".join(cKeyboard.currInput[:-1]))
                 print "found_code_with_extra_char" + cKeyboard.currInput[-1]
-                writeString(string)
-                keyboard.send("backspace")
+                # keyboard.send("backspace")
+                writeString(string, len(cKeyboard.currInput))
                 keyboard.send(cKeyboard.currInput[-1])
-            cKeyboard.state = "nothing"
+
 
 
 keyboard.hook(callback)
