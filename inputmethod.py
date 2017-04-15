@@ -1,6 +1,7 @@
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 import time
+import string
 
 class ClafricaKeyboard:
     def __init__(self):
@@ -106,7 +107,9 @@ controller = Controller()
 
 def on_press(key):
     try:
-        if key.char not in cKeyboard.allowed_characters:
+        # Strip string representation of the key and search in string.punctuation( !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ )
+        key_stripped = str(key).strip("'") if "'" not in str(key).strip("'") else str(key).strip('"')
+        if key.char not in cKeyboard.allowed_characters and key_stripped not in string.punctuation:
             # print( "no " + key.char)
             return
 
