@@ -157,7 +157,6 @@ def on_press(key):
             key))
         # **PREVENT PROPAGATION
         time.sleep(0.01)
-        #
         if key == Key.backspace:
             if cKeyboard.ended:
                 print("ended method")
@@ -174,8 +173,9 @@ def on_press(key):
             else:
                 cKeyboard.current_dict = {}
             # print(cKeyboard.curr_input)
-        elif key in [Key.space, Key.enter]:
-            if len(cKeyboard.curr_input) == 0:
+        elif key in [Key.space, Key.enter]: 
+            if len(cKeyboard.curr_input) == 0 or not bool(cKeyboard.current_dict.get("".join(cKeyboard.curr_input))):
+                cKeyboard.clear_objects()
                 return
             print(cKeyboard.curr_input)
             cKeyboard.state = "found_code"
