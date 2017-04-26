@@ -2,8 +2,11 @@ import threading
 import time
 import string
 from pynput import keyboard
-from pynput.keyboard import Key, Controller
+from pynput.keyboard import Key
 from inputmethod import ClafricaKeyboard
+
+__author__ = "Harvey Sama"
+__date__ = "$22 April 2017 21:42:56$"
 
 
 class Concur(threading.Thread):
@@ -37,13 +40,14 @@ class Concur(threading.Thread):
             # We are sure that it wasn't backspace (else except will be executed)
             self.cKeyboard.ended = False
             # use ckcodes if currdict is empty
-            this_dict = self.cKeyboard.codes if bool(self.cKeyboard.current_dict) is False else self.cKeyboard.current_dict
+            this_dict = self.cKeyboard.codes if not bool(self.cKeyboard.current_dict) else self.cKeyboard.current_dict
             # print this_dict
 
             new_dict = self.cKeyboard.update_dictionary(this_dict, self.cKeyboard.curr_input)
             # print (new_dict)
 
-            if bool(new_dict) and len(new_dict) == 1 and bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
+            if bool(new_dict) and len(new_dict) == 1 and \
+                    bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
                 # print(new_dict)
                 self.cKeyboard.state = "found_code"
             elif bool(new_dict) is False:
@@ -54,7 +58,8 @@ class Concur(threading.Thread):
                 #     TODO: Reimplement to prevent search_partial_valid_code to be called twice here
                 elif bool(self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])[0]):
                     # search recursively starting from [1:] to [-1]
-                    (self.cKeyboard.current_dict, self.cKeyboard.curr_input) = self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
+                    (self.cKeyboard.current_dict, self.cKeyboard.curr_input) = \
+                        self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
 
                     print(self.cKeyboard.curr_input)
                     # all such lines to be removed
@@ -95,12 +100,14 @@ class Concur(threading.Thread):
                 if bool(self.cKeyboard.dictionaries) and len(self.cKeyboard.dictionaries) > 0:
 
                     self.cKeyboard.dictionaries.pop()
-                    self.cKeyboard.current_dict = self.cKeyboard.dictionaries[-1] if len(self.cKeyboard.dictionaries) > 0 else {}
+                    self.cKeyboard.current_dict = self.cKeyboard.dictionaries[-1] \
+                        if len(self.cKeyboard.dictionaries) > 0 else {}
                 else:
                     self.cKeyboard.current_dict = {}
                     # print(self.cKeyboard.curr_input)
             elif key in [Key.space, Key.enter]:
-                if len(self.cKeyboard.curr_input) == 0 or not bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
+                if len(self.cKeyboard.curr_input) == 0 or \
+                        not bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
                     self.cKeyboard.clear_objects()
                     return
                 print(self.cKeyboard.curr_input)

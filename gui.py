@@ -1,10 +1,5 @@
 from tkinter import *
-from pynput import keyboard
 from keyboard_thread import Concur
-from pynput.keyboard import Key, Controller
-import time
-import string
-from inputmethod import ClafricaKeyboard
 '''
 Created on 2017-01-22
 @author: William Tchoudi, Harvey Sama
@@ -34,16 +29,16 @@ class GuiHandle():
         photo = PhotoImage(file="logo.png")
         app.grid()
         img = Label(app, image=photo)
+
         '''Method that start the clafica to fire translation when type clafica code  '''
         def startClafica():
             self.concur = Concur()
             self.concur.start()
-
+            startBut.config(state="disabled", bg='yellow')
 
         ''' Method stopClafrica to stop the Clafrica and close the GUI'''
         def stopClafrica():
-            """Stop program and set the global flag to False."""
-            # keyboard.Listener.stop
+            startBut.config(state="normal", bg='green')
             self.concur.pause()
         ''' internal function onClose to handle close window event on callback'''
         def onClose():
@@ -61,27 +56,15 @@ class GuiHandle():
 
         emptyText = Label(app, text="  ")
         img.grid()
-        clafricaLabel.grid(row = 2, column = 0)
-        startBut.grid(column=0,row=3)
-        emptyText.grid(row = 4 , column = 0)
-        stopBut.grid(column=0,row=5)
+        clafricaLabel.grid(row=2, column=0)
+        startBut.grid(column=0, row=3)
+        emptyText.grid(row=4, column=0)
+        stopBut.grid(column=0, row=5)
 
         root.bind('<Escape>', lambda e: root.destroy())
         root.protocol("WM_DELETE_WINDOW", onClose)  # handle event when window is closed by user
         root.mainloop()
 
-
-
-
 if __name__ == '__main__':
-    # cKeyboard = ClafricaKeyboard()
-    # concur = Concur()
     gui = GuiHandle()
-    # gui.concur = Concur()
     gui.guiLunch()
-    # while running.condition:
-    #     concur.resume()
-    #
-    # #after some operation
-    # concur.pause()
-    #some other operation
