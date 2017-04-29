@@ -1,0 +1,18 @@
+Modifications à faire: TODO 
+
+1. transformer le fichier code.txt en format du fichier claf.py
+
+2. Remplacer le fichier code.txt par le fichier claf.py, utiliser ce format et non aller lire dans le 
+	fichier texte code.txt
+
+3. Importer le fichier claf.py 
+
+4. Modifier la méthode load_codes() pour intégrer l'objet litteral codeClafrica importé depuis le claf.py
+	- Parcourir codeClafrica et construire le même dictionnaire pour avoir la même structure du code
+
+5. integrer la GUI du  fichier clafricaMain.py: TODO
+	- le bouton stop (rouge) arrete juste la traduction mais pas le code
+	- le bouton demmarer (vert) met la traduction en marche 
+	- la fermeture de la fenetre entraine l'arrêt complet de l'application et de tous les processus
+
+6. Toutes ls fonction ou méthode doivent être commenter avant la declaration  
