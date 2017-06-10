@@ -24,7 +24,7 @@ class GuiHandle():
     def guiLunch(self):
         root = Tk()
         root.title("Clafrica all lane")
-        root.geometry("500x350")
+        root.geometry("440x380")
         app = Frame(root)
         photo = PhotoImage(file="logo.png")
         app.grid()
@@ -42,15 +42,15 @@ class GuiHandle():
             self.concur.pause()
         ''' internal function onClose to handle close window event on callback'''
         def onClose():
-            stopClafrica()
+
             # self.concur.stop()
             root.destroy()   # stops the main loop
             sys.exit(1)
 
         startBut = Button(app, text="Start Clafrica", width=15, height=2 , bg='green', fg = 'white', command = startClafica)
         stopBut = Button(app, text="Stop Clafrica", width=15, height=2, bg='red', fg = 'white', command = stopClafrica)
-        clafricaLabel = Label(app, text="This Clafrica allow you to \n translate your Clafrica Code when editing \n \
-        for a complete text translation use the online Version at:\n http://resulam.com/fr/clafrica-web/\n \
+        clafricaLabel = Label(app, text="This Clafrica allow you to translate your Clafrica Code when editing \n \
+        For a complete text translation use the online Version at:\n http://resulam.com/fr/clafrica-web/\n \
         Press Start Button to start the application and stop Button to stop Clafrica \n \
         To exit the whole application simply close the Window")
 
@@ -63,6 +63,7 @@ class GuiHandle():
 
         root.bind('<Escape>', lambda e: root.destroy())
         root.protocol("WM_DELETE_WINDOW", onClose)  # handle event when window is closed by user
+        root.resizable(width=False, height=False)
         root.mainloop()
 
 if __name__ == '__main__':

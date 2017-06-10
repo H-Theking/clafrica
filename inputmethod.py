@@ -1,5 +1,6 @@
 from pynput.keyboard import Key, Controller
 import time
+import re
 
 __author__ = "Harvey Sama"
 __date__ = "$17 mars 2017 07:55:15$"
@@ -24,7 +25,7 @@ class ClafricaKeyboard:
         characters = {}
         for line in codes:
             # try:
-            keyVal = line.strip().split(" ")
+            keyVal = re.split('\s+', line.strip())
                 # cKeyboard.codes[keyval[0]] = keyval[1]
             characters.update(dict(zip(*[iter(keyVal)] * 2)))
         return characters
