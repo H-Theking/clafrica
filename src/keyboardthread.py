@@ -1,19 +1,24 @@
+import string
 import threading
 import time
-import string
+
 from pynput import keyboard
 from pynput.keyboard import Key
-from inputmethod import ClafricaKeyboard
+from pynput import mouse
+from src.inputmethod import ClafricaKeyboard
 
 __author__ = "Harvey Sama"
 __date__ = "$22 April 2017 21:42:56$"
 
+input_method = ClafricaKeyboard()
 
-class Concur(threading.Thread):
+
+class KeyboardThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.cKeyboard = ClafricaKeyboard()
+        self.cKeyboard = input_method
         self.listener = None
+        # self.mouse_listener = None
 
     def run(self):
         self.resume()
@@ -24,8 +29,16 @@ class Concur(threading.Thread):
         ) as self.listener:
             self.listener.join()
 
+        # with mouse.Listener(
+        #         on_click=self.on_click
+        # ) as self.mouse_listener:
+        #     self.mouse_listener.join()
+
     def pause(self):
         self.listener.stop()
+
+    def on_click(self, x, y, button, pressed):
+        self.cKeyboard.curr_input = []
 
     def on_press(self, key):
         try:

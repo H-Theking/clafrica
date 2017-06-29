@@ -1,5 +1,8 @@
 from tkinter import *
-from keyboard_thread import Concur
+from src.keyboardthread import KeyboardThread
+from src.mousethread import MouseThread
+import os
+
 '''
 Created on 2017-01-22
 @author: William Tchoudi, Harvey Sama
@@ -16,39 +19,43 @@ class GuiHandle():
         '''
         Constructor
         '''
-        global flag
-        global isRunning
-        self.concur = None
+        self.keyboard_thread = None
+        self.mouse_thread = None
 
     ''' Method to build a simple graphical interface that allow to  to start and stop the clafrica '''
-    def guiLunch(self):
+    def launch_gui(self):
         root = Tk()
         root.title("Clafrica all lane")
         root.geometry("440x380")
         app = Frame(root)
-        photo = PhotoImage(file="logo.png")
+        print(os.path.abspath("../resources/logo.png"))
+        photo = PhotoImage(file="../resources/logo.png")
         app.grid()
         img = Label(app, image=photo)
 
         '''Method that start the clafica to fire translation when type clafica code  '''
-        def startClafica():
-            self.concur = Concur()
-            self.concur.start()
+        def start_listener():
+            self.keyboard_thread = KeyboardThread()
+            self.keyboard_thread.start()
+            self.mouse_thread = MouseThread()
+            self.mouse_thread.start()
             startBut.config(state="disabled", bg='yellow')
 
         ''' Method stopClafrica to stop the Clafrica and close the GUI'''
-        def stopClafrica():
+        def stop_listener():
             startBut.config(state="normal", bg='green')
-            self.concur.pause()
+            if self.keyboard_thread is not None and self.keyboard_thread.isAlive():
+                self.keyboard_thread.pause()
+                self.mouse_thread.pause()
         ''' internal function onClose to handle close window event on callback'''
-        def onClose():
+        def on_close():
 
-            # self.concur.stop()
+            stop_listener()
             root.destroy()   # stops the main loop
             sys.exit(1)
 
-        startBut = Button(app, text="Start Clafrica", width=15, height=2 , bg='green', fg = 'white', command = startClafica)
-        stopBut = Button(app, text="Stop Clafrica", width=15, height=2, bg='red', fg = 'white', command = stopClafrica)
+        startBut = Button(app, text="Start Clafrica", width=15, height=2, bg='green', fg='white', command=start_listener)
+        stopBut = Button(app, text="Stop Clafrica", width=15, height=2, bg='red', fg = 'white', command=stop_listener)
         clafricaLabel = Label(app, text="This Clafrica allow you to translate your Clafrica Code when editing \n \
         For a complete text translation use the online Version at:\n http://resulam.com/fr/clafrica-web/\n \
         Press Start Button to start the application and stop Button to stop Clafrica \n \
@@ -62,10 +69,10 @@ class GuiHandle():
         stopBut.grid(column=0, row=5)
 
         root.bind('<Escape>', lambda e: root.destroy())
-        root.protocol("WM_DELETE_WINDOW", onClose)  # handle event when window is closed by user
+        root.protocol("WM_DELETE_WINDOW", on_close)  # handle event when window is closed by user
         root.resizable(width=False, height=False)
         root.mainloop()
 
 if __name__ == '__main__':
     gui = GuiHandle()
-    gui.guiLunch()
+    gui.launch_gui()
