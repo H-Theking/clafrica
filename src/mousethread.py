@@ -1,16 +1,20 @@
 import string
 import threading
-from  src.keyboardthread import input_method
+# from  src.keyboardthread import input_method
 from pynput import mouse
 
 __author__ = "Harvey Sama"
-__date__='$17 June 2017 23:35:'
+__date__ = '$17 June 2017 23:35:'
 
 
 class MouseThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.mouse_listener = None
+        self.cKeyboard = None
+
+    def setClafricaController(self, cKeyboard):
+        self.cKeyboard = cKeyboard
 
     def run(self):
         self.resume()
@@ -26,4 +30,4 @@ class MouseThread(threading.Thread):
         self.mouse_listener.stop()
 
     def on_click(self, x, y, button, pressed):
-        input_method.curr_input = []
+        self.cKeyboard.curr_input = []

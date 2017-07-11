@@ -1,6 +1,5 @@
 from tkinter import *
-from src.keyboardthread import KeyboardThread
-from src.mousethread import MouseThread
+from src.inputmethod import *
 import os
 
 '''
@@ -19,7 +18,7 @@ class GuiHandle():
         '''
         Constructor
         '''
-        self.keyboard_thread = None
+        self.input_method = None
         self.mouse_thread = None
 
     ''' Method to build a simple graphical interface that allow to  to start and stop the clafrica '''
@@ -35,18 +34,16 @@ class GuiHandle():
 
         '''Method that start the clafica to fire translation when type clafica code  '''
         def start_listener():
-            self.keyboard_thread = KeyboardThread()
-            self.keyboard_thread.start()
-            self.mouse_thread = MouseThread()
-            self.mouse_thread.start()
+            self.input_method = ClafricaKeyboard()
+            self.input_method.start()
             startBut.config(state="disabled", bg='yellow')
 
         ''' Method stopClafrica to stop the Clafrica and close the GUI'''
         def stop_listener():
             startBut.config(state="normal", bg='green')
-            if self.keyboard_thread is not None and self.keyboard_thread.isAlive():
-                self.keyboard_thread.pause()
-                self.mouse_thread.pause()
+            if self.input_method is not None and self.input_method.is_alive():
+                self.input_method._stop()
+                # self.mouse_thread_instance.pause()
         ''' internal function onClose to handle close window event on callback'''
         def on_close():
 

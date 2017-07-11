@@ -1,24 +1,21 @@
-import string
 import threading
-import time
 
 from pynput import keyboard
 from pynput.keyboard import Key
-from pynput import mouse
-from src.inputmethod import ClafricaKeyboard
 
 __author__ = "Harvey Sama"
 __date__ = "$22 April 2017 21:42:56$"
-
-input_method = ClafricaKeyboard()
 
 
 class KeyboardThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.cKeyboard = input_method
+        self.cKeyboard = None
         self.listener = None
-        # self.mouse_listener = None
+        self.processing = False
+
+    def setClafricaController(self, cKeyboard):
+        self.cKeyboard = cKeyboard
 
     def run(self):
         self.resume()
@@ -29,22 +26,16 @@ class KeyboardThread(threading.Thread):
         ) as self.listener:
             self.listener.join()
 
-        # with mouse.Listener(
-        #         on_click=self.on_click
-        # ) as self.mouse_listener:
-        #     self.mouse_listener.join()
-
     def pause(self):
         self.listener.stop()
 
-    def on_click(self, x, y, button, pressed):
-        self.cKeyboard.curr_input = []
-
     def on_press(self, key):
+        self.processing = True
         try:
             # Strip string representation of the key and search in string.punctuation( !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ )
             key_stripped = str(key).strip("'") if "'" not in str(key).strip("'") else str(key).strip('"')
-            if key.char not in self.cKeyboard.allowed_characters and key_stripped not in string.punctuation:
+            print(key_stripped)
+            if key.char not in self.cKeyboard.allowed_characters: #and key_stripped not in string.punctuation:
                 # print( "no " + key.char)
                 return
 
@@ -57,7 +48,7 @@ class KeyboardThread(threading.Thread):
             # print this_dict
 
             new_dict = self.cKeyboard.update_dictionary(this_dict, self.cKeyboard.curr_input)
-            # print (new_dict)
+            print (new_dict)
 
             if bool(new_dict) and len(new_dict) == 1 and \
                     bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
@@ -91,16 +82,18 @@ class KeyboardThread(threading.Thread):
                 # print(new_dict)
                 self.cKeyboard.current_dict = new_dict
                 self.cKeyboard.dictionaries.append(new_dict)
-            self.cKeyboard.run_state()
+            # self.cKeyboard.run_state()
+
+            # self.cKeyboard.write_characters(claf, extra)
             # for some reason at the end of this method execution, backspace key events are sent
             # I use this variable as a workaround to prevent propagation in **PREVENT PROPAGATION
             self.cKeyboard.ended = True
-            print(self.cKeyboard.curr_input)
+            print("Printing at the end of try")
         except AttributeError:
             print('special key {0} pressed'.format(
                 key))
             # **PREVENT PROPAGATION
-            time.sleep(0.01)
+            # time.sleep(0.01)
             if key == Key.backspace:
                 if self.cKeyboard.ended:
                     print("ended method")
@@ -125,7 +118,8 @@ class KeyboardThread(threading.Thread):
                     return
                 print(self.cKeyboard.curr_input)
                 self.cKeyboard.state = "found_code"
-                self.cKeyboard.press_and_release(Key.left)
-                time.sleep(0.01)
-                self.cKeyboard.run_state()
-                self.cKeyboard.press_and_release(Key.right)
+        # print("state "+self.cKeyboard.state)
+        self.processing = False
+
+    def isProcessing(self):
+        return self.processing

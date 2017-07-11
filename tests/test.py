@@ -1,38 +1,38 @@
 import unittest
 from src.inputmethod import ClafricaKeyboard
-from src.keyboardthread import Concur
-import re
+from src.keyboardthread import input_method
+# import re
 
 
 class MyTestCase(unittest.TestCase):
-
-    def setUp(self):
-        self.concur = Concur()
-        self.concur.run()
-
-    def tearDown(self):
-        self.concur.pause()
-        del self.concur
-
-    def test_stop_listener(self):
-        self.concur.pause()
-        self.assertFalse(self.concur.running)
-
+    #
     # def setUp(self):
-    #     self.concur = Concur()
-    #     self.cKeyboard = ClafricaKeyboard()
+    #     self.concur = ClafricaKeyboard()
     #     self.concur.run()
     #
     # def tearDown(self):
     #     self.concur.pause()
-    #     del self.concur, self.cKeyboard
+    #     del self.concur
     #
-    # def test_exact_code(self):
-    #     code = 'a94'
-    #     expected = 'a̤̍'
-    #     print(self.concur.listener.type(code))
-    #     self.assertTrue(True, True)
-    #     # self.assertEqual(self.concur.listener.type(code), expected)
+    # def test_stop_listener(self):
+    #     self.concur.pause()
+    #     self.assertFalse(self.concur.running)
+
+    def setUp(self):
+        self.kbthread = input_method
+        self.cKeyboard = ClafricaKeyboard()
+        self.kbthread.start()
+
+    def tearDown(self):
+        self.kbthread.pause()
+        del self.kbthread, self.cKeyboard
+
+    def test_exact_code(self):
+        code = 'a94'
+        expected = 'a̤̍'
+        print(self.kbthread.listener.type(code))
+        # self.assertTrue(True, True)
+        # self.assertEqual(self.kbthread., expected)
     #
     # def setUp(self):
     #     self.concur = Concur()
