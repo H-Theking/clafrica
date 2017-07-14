@@ -15,6 +15,7 @@ class ClafricaKeyboard(threading.Thread):
         self.init_class = init_class
         self.keyboard_thread_instance = None
         self.mouse_thread_instance = None
+        self.typing = True
         self.codes = self.load_codes()
         self.current_dict = {}
         self.dictionaries = []
@@ -56,6 +57,8 @@ class ClafricaKeyboard(threading.Thread):
         while self.keyboard_thread_instance.is_alive():
             if self.state is not "nothing":
                 string, extra, length = self.run_state()
+                self.clear_objects()
+                self.typing = False
                 self.write_characters(string, extra, length)
             time.sleep(0.1)
             # print(self.state)
@@ -64,6 +67,7 @@ class ClafricaKeyboard(threading.Thread):
 
     def search_partial_valid_code(self, input_list):
         found_codes = self.update_dictionary(self.codes, input_list)
+        print("in recursive search")
         print(input_list)
         if bool(found_codes):
             return found_codes, input_list
@@ -86,9 +90,6 @@ class ClafricaKeyboard(threading.Thread):
             string = self.current_dict.get("".join(self.curr_input[:-1]))
             print("found_code_with_extra_char " + self.curr_input[-1])
             extra = self.curr_input[-1]
-        elif self.state == "last_valid":
-            last_char = self.curr_input
-            extra = last_char
         return string, extra, len(self.curr_input)
 
     def write_characters(self, string, extra, length) -> None:
@@ -96,7 +97,7 @@ class ClafricaKeyboard(threading.Thread):
             self.controller.press(Key.backspace)
         self.controller.type(string)
         print("done typing")
-        self.clear_objects()
+        # self.clear_objects()
 
         if extra is not "":
             if extra is "space":
@@ -106,6 +107,7 @@ class ClafricaKeyboard(threading.Thread):
             else:
                 self.controller.type(extra)
         self.state = "nothing"
+        self.typing = True
 
     def clear_objects(self):
         self.curr_input = []

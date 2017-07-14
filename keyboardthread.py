@@ -31,6 +31,8 @@ class KeyboardThread(threading.Thread):
 
     def on_release(self, key):
         try:
+            if not self.cKeyboard.typing:
+                return
             # Strip string representation of the key and search in string.punctuation( !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ )
             key_stripped = str(key).strip("'") if "'" not in str(key).strip("'") else str(key).strip('"')
             print(key_stripped)
@@ -52,6 +54,7 @@ class KeyboardThread(threading.Thread):
             if bool(new_dict) and len(new_dict) == 1 and \
                     bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
                 # print(new_dict)
+                print("Found code")
                 self.cKeyboard.state = "found_code"
             elif bool(new_dict) is False:
                 # Let's check whether the previous input key exists in the dictionary
@@ -60,11 +63,11 @@ class KeyboardThread(threading.Thread):
                     self.cKeyboard.state = "found_code_with_extra_char"
                     return
                 else:
-                    codes_dict, list = self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
+                    codes_dict, char_list = self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
                     # search recursively starting from [1:] to [-1]
                     if bool(codes_dict):
                         self.cKeyboard.current_dict = codes_dict
-                        self.cKeyboard.curr_input = list
+                        self.cKeyboard.curr_input = char_list
                         # self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
 
                     # print(self.cKeyboard.curr_input)
