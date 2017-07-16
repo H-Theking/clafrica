@@ -4,6 +4,7 @@ from mousethread import MouseThread
 import time
 import threading
 import re
+import codes
 
 __author__ = "Harvey Sama"
 __date__ = "$17 mars 2017 07:55:15$"
@@ -15,13 +16,12 @@ class ClafricaKeyboard(threading.Thread):
         self.init_class = init_class
         self.keyboard_thread_instance = None
         self.mouse_thread_instance = None
-        self.codes = self.load_codes()
+        self.typing = True
+        self.codes = codes.character_codes
         self.current_dict = {}
         self.dictionaries = []
         self.curr_input = []  # list of characters
         self.state = "nothing"
-        self.ended = False
-        self.typing = True
         self.allowed_characters = [".", "*", "-", "_", "?", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                                    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
                                    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
@@ -31,11 +31,11 @@ class ClafricaKeyboard(threading.Thread):
 
     def run(self):
         self.keyboard_thread_instance = self.init_class()
-        self.keyboard_thread_instance.setClafricaController(self)
+        self.keyboard_thread_instance.set_clafrica_controller(self)
         self.keyboard_thread_instance.start()
 
         self.mouse_thread_instance = MouseThread()
-        self.mouse_thread_instance.setClafricaController(self)
+        self.mouse_thread_instance.set_clafrica_controller(self)
         self.mouse_thread_instance.start()
         self.call()
 
@@ -43,29 +43,21 @@ class ClafricaKeyboard(threading.Thread):
         self.keyboard_thread_instance.pause()
         self.mouse_thread_instance.pause()
 
-    def load_codes(self):
-        codes = open("resources/codes.txt", "r", encoding="utf8")
-        characters = {}
-        for line in codes:
-            # try:
-            keyVal = re.split('\s+', line.strip())
-                # cKeyboard.codes[keyval[0]] = keyval[1]
-            characters.update(dict(zip(*[iter(keyVal)] * 2)))
-        # print(characters)
-        return characters
-
     def call(self):
         while self.keyboard_thread_instance.is_alive():
-            if not self.keyboard_thread_instance.isProcessing() and self.state is not "nothing":
+            if self.state is not "nothing":
                 string, extra, length = self.run_state()
-                self.write_characters(string,extra,length)
-            time.sleep(0.1)
+                self.clear_objects()
+                self.typing = False
+                self.write_characters(string, extra, length)
+
             # print(self.state)
 
         print("Clafrica keyboard stopped. Now exiting")
 
     def search_partial_valid_code(self, input_list):
         found_codes = self.update_dictionary(self.codes, input_list)
+        print("in recursive search")
         print(input_list)
         if bool(found_codes):
             return found_codes, input_list
@@ -88,20 +80,14 @@ class ClafricaKeyboard(threading.Thread):
             string = self.current_dict.get("".join(self.curr_input[:-1]))
             print("found_code_with_extra_char " + self.curr_input[-1])
             extra = self.curr_input[-1]
-        elif self.state == "last_valid":
-            last_char = self.curr_input
-            extra = last_char;
         return string, extra, len(self.curr_input)
 
     def write_characters(self, string, extra, length) -> None:
-        combined = str(string) + str(extra)
-        print("combined " + combined)
         for i in range(1, length + 1):
             self.controller.press(Key.backspace)
         self.controller.type(string)
         print("done typing")
-        # self.flush_input()
-        self.clear_objects()
+        # self.clear_objects()
 
         if extra is not "":
             if extra is "space":
@@ -110,18 +96,8 @@ class ClafricaKeyboard(threading.Thread):
                 self.controller.press(Key.enter)
             else:
                 self.controller.type(extra)
-        print("input ")
         self.state = "nothing"
-        print(self.curr_input)
         self.typing = True
-
-    def handle_extra_string(self, extra):
-        self.clear_objects()
-        char_dict = self.update_dictionary(self.codes, extra)
-        if bool(char_dict):
-            self.curr_input = extra if type(extra) is list else [extra]
-            self.current_dict = char_dict
-            self.dictionaries = [self.current_dict]
 
     def clear_objects(self):
         self.curr_input = []
@@ -140,12 +116,3 @@ class ClafricaKeyboard(threading.Thread):
             if key.startswith("".join(string)):
                 new_dict[key] = curr_dict.get(key)
         return new_dict
-
-    # def flush_input(self):
-    #     try:
-    #         import msvcrt
-    #         while msvcrt.kbhit():
-    #             msvcrt.getch()
-    #     except ImportError:
-    #         import sys, termios
-    #         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
