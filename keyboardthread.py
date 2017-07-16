@@ -1,3 +1,4 @@
+import string
 import threading
 
 from pynput import keyboard
@@ -12,9 +13,8 @@ class KeyboardThread(threading.Thread):
         threading.Thread.__init__(self)
         self.cKeyboard = None
         self.listener = None
-        self.processing = False
 
-    def setClafricaController(self, cKeyboard):
+    def set_clafrica_controller(self, cKeyboard):
         self.cKeyboard = cKeyboard
 
     def run(self):
@@ -22,20 +22,21 @@ class KeyboardThread(threading.Thread):
 
     def resume(self):
         with keyboard.Listener(
-                on_press=self.on_press
+                on_release=self.on_release
         ) as self.listener:
             self.listener.join()
 
     def pause(self):
         self.listener.stop()
 
-    def on_press(self, key):
-        self.processing = True
+    def on_release(self, key):
         try:
+            if not self.cKeyboard.typing:
+                return
             # Strip string representation of the key and search in string.punctuation( !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ )
             key_stripped = str(key).strip("'") if "'" not in str(key).strip("'") else str(key).strip('"')
             print(key_stripped)
-            if key.char not in self.cKeyboard.allowed_characters: #and key_stripped not in string.punctuation:
+            if key.char not in self.cKeyboard.allowed_characters and key_stripped not in string.punctuation:
                 # print( "no " + key.char)
                 return
 
@@ -53,27 +54,31 @@ class KeyboardThread(threading.Thread):
             if bool(new_dict) and len(new_dict) == 1 and \
                     bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
                 # print(new_dict)
+                print("Found code")
                 self.cKeyboard.state = "found_code"
             elif bool(new_dict) is False:
                 # Let's check whether the previous input key exists in the dictionary
                 if bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input[:-1]))):
                     # print ("Yay I exist ")  # + char
                     self.cKeyboard.state = "found_code_with_extra_char"
-                #     TODO: Reimplement to prevent search_partial_valid_code to be called twice here
-                elif bool(self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])[0]):
+                    return
+                else:
+                    codes_dict, char_list = self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
                     # search recursively starting from [1:] to [-1]
-                    (self.cKeyboard.current_dict, self.cKeyboard.curr_input) = \
-                        self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
+                    if bool(codes_dict):
+                        self.cKeyboard.current_dict = codes_dict
+                        self.cKeyboard.curr_input = char_list
+                        # self.cKeyboard.search_partial_valid_code(self.cKeyboard.curr_input[1:])
 
-                    print(self.cKeyboard.curr_input)
+                    # print(self.cKeyboard.curr_input)
                     # all such lines to be removed
                     self.cKeyboard.dictionaries.append(self.cKeyboard.current_dict)
                     print("some character(s) valid")
-                    self.cKeyboard.state = "last_valid"
-                else:
-                    print("not_found")
-                    # print(self.cKeyboard.codes.get(key.char))
-                    self.cKeyboard.clear_objects()
+                    return
+
+                print("not_found")
+                # print(self.cKeyboard.codes.get(key.char))
+                self.cKeyboard.clear_objects()
             # it is not the case that if the length is one then the user typed all the character codes
             # an exception is ae+: if the user types ae, len(new_dict) is one as its the only code with ae
 
@@ -87,7 +92,7 @@ class KeyboardThread(threading.Thread):
             # self.cKeyboard.write_characters(claf, extra)
             # for some reason at the end of this method execution, backspace key events are sent
             # I use this variable as a workaround to prevent propagation in **PREVENT PROPAGATION
-            self.cKeyboard.ended = True
+            # self.cKeyboard.ended = True
             print("Printing at the end of try")
         except AttributeError:
             print('special key {0} pressed'.format(
@@ -95,9 +100,9 @@ class KeyboardThread(threading.Thread):
             # **PREVENT PROPAGATION
             # time.sleep(0.01)
             if key == Key.backspace:
-                if self.cKeyboard.ended:
-                    print("ended method")
-                    return
+                # if self.cKeyboard.ended:
+                #     print("ended method")
+                #     return
 
                 # print "in backspace"
                 if len(self.cKeyboard.curr_input) > 0:
@@ -121,7 +126,3 @@ class KeyboardThread(threading.Thread):
                 print(self.cKeyboard.curr_input)
                 self.cKeyboard.state = "found_code_with_extra_char"
         # print("state "+self.cKeyboard.state)
-        self.processing = False
-
-    def isProcessing(self):
-        return self.processing

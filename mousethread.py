@@ -11,7 +11,7 @@ class MouseThread(threading.Thread):
         self.mouse_listener = None
         self.cKeyboard = None
 
-    def setClafricaController(self, cKeyboard):
+    def set_clafrica_controller(self, cKeyboard):
         self.cKeyboard = cKeyboard
 
     def run(self):
