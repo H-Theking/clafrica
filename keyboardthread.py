@@ -22,14 +22,14 @@ class KeyboardThread(threading.Thread):
 
     def resume(self):
         with keyboard.Listener(
-                on_release=self.on_release
+                on_press=self.on_press
         ) as self.listener:
             self.listener.join()
 
     def pause(self):
         self.listener.stop()
 
-    def on_release(self, key):
+    def on_press(self, key):
         try:
             if not self.cKeyboard.typing:
                 return
@@ -41,7 +41,7 @@ class KeyboardThread(threading.Thread):
                 return
 
             self.cKeyboard.curr_input.append(key.char)
-            print(self.cKeyboard.curr_input)
+            # print(self.cKeyboard.curr_input)
             # We are sure that it wasn't backspace (else except will be executed)
             self.cKeyboard.ended = False
             # use ckcodes if currdict is empty
@@ -49,7 +49,7 @@ class KeyboardThread(threading.Thread):
             # print this_dict
 
             new_dict = self.cKeyboard.update_dictionary(this_dict, self.cKeyboard.curr_input)
-            print (new_dict)
+            # print (new_dict)
 
             if bool(new_dict) and len(new_dict) == 1 and \
                     bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
@@ -116,13 +116,15 @@ class KeyboardThread(threading.Thread):
                 else:
                     self.cKeyboard.current_dict = {}
                     # print(self.cKeyboard.curr_input)
-            elif key in [Key.space, Key.enter]:
+            elif key not in [Key.shift, Key.caps_lock, Key.cmd_l, Key.cmd_r, Key.alt_l, Key.alt_r, Key.alt_gr, Key.ctrl_l, Key.ctrl_r,\
+                             Key.insert, Key.delete]:
                 if len(self.cKeyboard.curr_input) == 0 or \
                         not bool(self.cKeyboard.current_dict.get("".join(self.cKeyboard.curr_input))):
                     self.cKeyboard.clear_objects()
                     return
                 print(key)
-                self.cKeyboard.curr_input.append("space") if key is Key.space else self.cKeyboard.curr_input.append("enter")
+                # self.cKeyboard.curr_input.append("space") if key is Key.space else self.cKeyboard.curr_input.append("enter")
+                self.cKeyboard.curr_input.append(key)
                 print(self.cKeyboard.curr_input)
                 self.cKeyboard.state = "found_code_with_extra_char"
         # print("state "+self.cKeyboard.state)

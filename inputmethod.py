@@ -17,7 +17,7 @@ class ClafricaKeyboard(threading.Thread):
         self.keyboard_thread_instance = None
         self.mouse_thread_instance = None
         self.typing = True
-        self.codes = codes.character_codes
+        self.codes = self.load_codes()
         self.current_dict = {}
         self.dictionaries = []
         self.curr_input = []  # list of characters
@@ -28,6 +28,17 @@ class ClafricaKeyboard(threading.Thread):
                                    "A", "B", 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
         self.controller = Controller()
+
+    def load_codes(self):
+        codes = open("resources/codes.txt", "r", encoding="utf8")
+        characters = {}
+        for line in codes:
+            # try:
+            keyVal = re.split('\s+', line.strip())
+            # cKeyboard.codes[keyval[0]] = keyval[1]
+            characters.update(dict(zip(*[iter(keyVal)] * 2)))
+        # print(characters)
+        return characters
 
     def run(self):
         self.keyboard_thread_instance = self.init_class()
@@ -72,13 +83,13 @@ class ClafricaKeyboard(threading.Thread):
         :rtype: tuple
         """
         # print(self.state)
-        extra = ''
+        extra = None
         string = ''
         if self.state == "found_code":
             string = self.current_dict.get("".join(self.curr_input))
         elif self.state == "found_code_with_extra_char":
             string = self.current_dict.get("".join(self.curr_input[:-1]))
-            print("found_code_with_extra_char " + self.curr_input[-1])
+            print("found_code_with_extra_char ") #+ self.curr_input[-1])
             extra = self.curr_input[-1]
         return string, extra, len(self.curr_input)
 
@@ -89,13 +100,16 @@ class ClafricaKeyboard(threading.Thread):
         print("done typing")
         # self.clear_objects()
 
-        if extra is not "":
-            if extra is "space":
-                self.controller.press(Key.space)
-            elif extra is "enter":
-                self.controller.press(Key.enter)
-            else:
-                self.controller.type(extra)
+        # if extra is not "":
+        #     if extra is "space":
+        #         self.controller.press(Key.space)
+        #     elif extra is "enter":
+        #         self.controller.press(Key.enter)
+        #     else:
+        #         self.controller.type(extra)
+        if extra is not None:
+            self.controller.press(extra)
+            self.controller.release(extra)
         self.state = "nothing"
         self.typing = True
 
