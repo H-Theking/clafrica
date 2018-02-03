@@ -71,8 +71,8 @@ class GuiHandle():
         startBut = Button(app, text="Start Clafrica", width=15, height=2, bg='green', fg='white',
                           command=start_listener)
         stopBut = Button(app, text="Stop Clafrica", width=15, height=2, bg='red', fg='white', command=stop_listener)
-        clafricaLabel = Label(app, text="This Clafrica allow you to translate your Clafrica Code when editing \n \
-        For a complete text translation use the online Version at:\n http://resulam.com/fr/clafrica-web/\n \
+        clafricaLabel = Label(app, text="This application allows you to translate your Clafrica Code when editing \n \
+        For a complete text translation use the online version at:\n http://resulam.com/fr/clafrica-web/\n \
         Press Start Button to start the application and stop Button to stop Clafrica \n \
         To exit the whole application simply close the Window")
 
